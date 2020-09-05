@@ -24,6 +24,12 @@ parser.add_argument(
 parser.add_argument(
     '--device_token', help='your device token')
 parser.add_argument(
+    '--fetch_rows', type=int, help='how many rows to fetch')
+parser.add_argument(
+    '--save_file', default='', help='file name to save as')
+parser.add_argument(
+    '--pending', action='store_true', help='include pending transactions')
+parser.add_argument(
     '--profit', action='store_true', help='calculate profit for each sale')
 args = parser.parse_args()
 username = args.username
@@ -63,7 +69,7 @@ if args.debug:
 
 # Vignesh save the CSV
 try:
-    with open("stocks.txt", "w+") as outfile:
+    with open(args.save_file, "w+") as outfile:
         outfile.write(str(orders))
 except IOError:
     print("Oops.  Unable to write options file to ", filename)
@@ -105,6 +111,8 @@ while paginated:
             else:
                 fields[counter]['Change_in_Buying_Power'] = "-" + (order['processed_premium']);
             row += 1
+    if row > args.fetch_rows:
+        paginated = False
     # paginate
     if orders['next'] is not None:
         page = page + 1
@@ -143,15 +151,28 @@ for row in fields:
 
     csv += "\n"
 
-# choose a filename to save to
-print("Choose a filename or press enter to save to `option-trades.csv`:")
-try:
-    input = raw_input
-except NameError:
-    pass
-filename = input().strip()
-if filename == '':
-    filename = "option-trades.csv"
+if args.save_file == '':
+    # choose a filename to save to
+    if args.fetch_rows > 0:
+        defaultFilename = "option-trades-last" + args.fetch_rows + ".csv"
+    else:
+        defaultFilename = "option-trades.csv"
+        
+
+    print("Choose a filename or press enter to save to `", defaultFilename, "`:")
+    try:
+        input = raw_input
+    except NameError:
+        pass
+    filename = input().strip()
+    if filename == '':
+        if (args.fetch_rows > 0):
+            filename = "option-trades-last" + args.fetch_rows + ".csv"
+        else:
+            filename = "option-trades.csv"
+else:
+    filename = args.save_file
+
 
 # save the CSV
 try:
