@@ -28,6 +28,8 @@ parser.add_argument(
 parser.add_argument(
     '--save_file', default='', help='file name to save as')
 parser.add_argument(
+    '--default_name', action='store_true', help='save the file with the defult name')
+parser.add_argument(
     '--pending', action='store_true', help='include pending transactions')
 parser.add_argument(
     '--profit', action='store_true', help='calculate profit for each sale')
@@ -67,12 +69,21 @@ if args.debug:
     except IOError:
         print('Oops.  Unable to write file to debug.txt')
 
+if args.save_file == '':
+    # choose a filename to save to
+    if args.fetch_rows != None and int(args.fetch_rows) > 0:
+        defaultFilename = "option-trades-last" + str(args.fetch_rows) + ".csv"
+    else:
+        defaultFilename = "option-trades.csv"
+else:
+    defaultFilename = args.save_file
+
 # Vignesh save the CSV
 try:
-    with open(args.save_file, "w+") as outfile:
+    with open(defaultFilename, "w+") as outfile:
         outfile.write(str(orders))
 except IOError:
-    print("Oops.  Unable to write options file to ", filename)
+    print("Oops.  Unable to write options file to ", defaultFilename)
 #Vignesh end
 
 # do/while for pagination
@@ -111,7 +122,7 @@ while paginated:
             else:
                 fields[counter]['Change_in_Buying_Power'] = "-" + (order['processed_premium']);
             row += 1
-    if row > args.fetch_rows:
+    if args.fetch_rows != None and int(args.fetch_rows) > 0 and (row > int(args.fetch_rows)):
         paginated = False
     # paginate
     if orders['next'] is not None:
@@ -151,35 +162,31 @@ for row in fields:
 
     csv += "\n"
 
-if args.save_file == '':
-    # choose a filename to save to
-    if args.fetch_rows > 0:
-        defaultFilename = "option-trades-last" + args.fetch_rows + ".csv"
-    else:
-        defaultFilename = "option-trades.csv"
-        
-
-    print("Choose a filename or press enter to save to `", defaultFilename, "`:")
+if (args.default_name):
+    filename = defaultFilename
+elif args.save_file == '':
+    print("Choose a filename or press enter to save to `" + defaultFilename + "`:")
     try:
         input = raw_input
     except NameError:
         pass
     filename = input().strip()
     if filename == '':
-        if (args.fetch_rows > 0):
-            filename = "option-trades-last" + args.fetch_rows + ".csv"
+        if args.fetch_rows != None and int(args.fetch_rows) > 0:
+            filename = "option-trades-last" + str(args.fetch_rows) + ".csv"
         else:
             filename = "option-trades.csv"
 else:
-    filename = args.save_file
+    filename = defaultFilename
 
 
 # save the CSV
 try:
     with open(filename, "w+") as outfile:
         outfile.write(csv)
+    print("file saved as " + filename)
 except IOError:
-    print("Oops. Unable to write file to ", filename, ". Close the file if it is open and try again.")
+    print("Oops. Unable to write file to " + filename + ". Close the file if it is open and try again.")
 
 if args.profit:
     profit_csv = profit_extractor(csv, filename)
