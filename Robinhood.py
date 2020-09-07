@@ -34,7 +34,8 @@ class Robinhood:
         "user": "https://api.robinhood.com/user/",
         "watchlists": "https://api.robinhood.com/watchlists/",
         "optionsOrders":"https://api.robinhood.com/options/orders/",
-        "optionsPositions":"https://api.robinhood.com/options/positions/"
+        "optionsPositions":"https://api.robinhood.com/options/positions/",
+        "optionsEvents":"https://api.robinhood.com/options/events/"
     }
 
     session = None
