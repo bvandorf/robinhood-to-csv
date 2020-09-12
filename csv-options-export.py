@@ -11,6 +11,8 @@ import os
 
 logged_in = False
 
+print('csv-options-export.py')
+
 parser = argparse.ArgumentParser(
     description='Export Robinhood trades to a CSV file')
 parser.add_argument(
@@ -42,6 +44,8 @@ device_token = args.device_token
 load_dotenv(find_dotenv())
 
 robinhood = Robinhood()
+
+print("logging in...")
 
 # login to Robinhood
 logged_in = collect_login_data(robinhood_obj=robinhood, username=username, password=password, device_token=device_token, mfa_code=mfa_code)
